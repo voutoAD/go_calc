@@ -1,7 +1,7 @@
 package go_calc_test
 
 import (
-	go_calc "github.com/voutoAD/go_calc"
+	"github.com/voutoad/go_calc/pkg/go_calc"
 	"testing"
 )
 
