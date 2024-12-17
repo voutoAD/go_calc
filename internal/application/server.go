@@ -23,41 +23,33 @@ func loggingMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func calcHandler(w http.ResponseWriter, r *http.Request) {
+func CalcHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		var reqData calculateRequest
-		var resultJSON calculateResponse
-		data := r.Body
-		buf := make([]byte, 100)
-		n, err := data.Read(buf)
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-		buf = buf[:n]
-		err = json.Unmarshal(buf, &reqData)
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-		expr := reqData.Expression
-		resultData, err := calc.Calc(expr)
+		var resultStruct calculateResponse
+		decoder := json.NewDecoder(r.Body)
+		err := decoder.Decode(&reqData)
+		//fmt.Printf("%+v", reqData)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(`{"error": "Internal server error"}`))
 			return
 		}
-		resultJSON.Result = fmt.Sprintf("%.6f", resultData)
-		resultBytes, err := json.Marshal(resultJSON)
+		resultData, err := calc.Calc(reqData.Expression)
+		if err != nil {
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			w.Write([]byte(`{"error": "Expression is not valid"}`))
+			return
+		}
+		resultStruct.Result = fmt.Sprintf("%.6f", resultData)
+		result, err := json.Marshal(resultStruct)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
-			return
+			w.Write([]byte(`{"error": "Internal server error"}`))
 		}
 		w.WriteHeader(http.StatusOK)
-		_, err = w.Write(resultBytes)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
+		w.Write(result)
+		return
 	} else {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		w.Write([]byte(`{"error":"Method not allowed"}`))
@@ -66,7 +58,7 @@ func calcHandler(w http.ResponseWriter, r *http.Request) {
 
 func (app *Application) RunServer() error {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/api/v1/calculate", calcHandler)
+	mux.HandleFunc("/api/v1/calculate", CalcHandler)
 	handler := loggingMiddleware(mux)
 	err := http.ListenAndServe(":3000", handler)
 	if err != nil {
