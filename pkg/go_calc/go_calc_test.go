@@ -43,4 +43,38 @@ func TestCalc(t *testing.T) {
 			}
 		})
 	}
+
+	testCasesFail := []struct {
+		name       string
+		expression string
+	}{
+		{
+			name:       "simple",
+			expression: "2+2+",
+		},
+		{
+			name:       "division by zero",
+			expression: "1/0",
+		},
+		{
+			name:       "priority",
+			expression: "2+2**2",
+		},
+		{
+			name:       "priority",
+			expression: "((2+2-*(2",
+		},
+		{
+			name:       "empty",
+			expression: "",
+		},
+	}
+	for _, testCase := range testCasesFail {
+		t.Run(testCase.name, func(t *testing.T) {
+			result, err := go_calc.Calc(testCase.expression)
+			if err == nil {
+				t.Fatalf("expression %s is invalid, but given result %f", testCase.expression, result)
+			}
+		})
+	}
 }
