@@ -29,7 +29,6 @@ func CalcHandler(w http.ResponseWriter, r *http.Request) {
 		var resultStruct calculateResponse
 		decoder := json.NewDecoder(r.Body)
 		err := decoder.Decode(&reqData)
-		//fmt.Printf("%+v", reqData)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(`{"error": "Internal server error"}`))

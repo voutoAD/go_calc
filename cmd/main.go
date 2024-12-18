@@ -6,5 +6,9 @@ import (
 
 func main() {
 	app := application.NewApplication()
+	//TIP Запуск сервиса в консольном режиме
+	//app.Run()
+
+	//TIP хапуск сервиса в серверном режиме
 	app.RunServer()
 }

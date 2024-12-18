@@ -19,7 +19,7 @@ func validate(expression string) (bool, error) {
 			count--
 		}
 		if k > 0 && strings.Contains("+-*/", string(expression[k])) && strings.Contains("+-*/", string(expression[k-1])) {
-			return false, fmt.Errorf("two symbols")
+			return false, fmt.Errorf("two symbols in row")
 		}
 		if v == '0' && expression[k-1] == '/' {
 			return false, fmt.Errorf("divide by zero")
@@ -66,6 +66,7 @@ func infixToPostfix(expression string) []rune {
 		} else if v == ')' {
 			stack, queue = pop(stack, queue)
 		}
+
 	}
 	if len(stack) != 0 {
 		for i := len(stack) - 1; i >= 0; i-- {
@@ -91,7 +92,7 @@ func pop(stack []rune, queue []rune) ([]rune, []rune) {
 		}
 		queue = append(queue, stack[i])
 	}
-	return stack, queue
+	return []rune{}, queue
 }
 
 func Calc(expression string) (float64, error) {
